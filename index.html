@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MAGUILA - Sistema de Mercado</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="imagens/UI.png" type="image/png" />
+  </head>
+  <body class="bg-gray-100 text-gray-900">
+    <header class="bg-indigo-700 text-white p-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="imagens/UI.png" alt="Logo" class="h-10 w-10" />
+        <h1 class="text-2xl font-bold">Sistema de Mercado Maguila</h1>
+      </div>
+      <button onclick="toggleSidebar()" class="bg-indigo-500 hover:bg-indigo-600 px-3 py-1 rounded">☰ Menu</button>
+    </header>
+
+    <div class="flex">
+      <nav id="sidebar" class="w-64 bg-white border-r border-gray-200 p-4 hidden md:block">
+        <h2 class="text-lg font-semibold mb-4">Menu</h2>
+        <ul class="space-y-2">
+          <li><button onclick="mostrarSecao('dashboard')" class="w-full text-left">Dashboard</button></li>
+          <li><button onclick="mostrarSecao('estoque')" class="w-full text-left">Estoque</button></li>
+          <li><button onclick="mostrarSecao('financeiro')" class="w-full text-left">Financeiro</button></li>
+          <li><button onclick="mostrarSecao('despesasReceitas')" class="w-full text-left">Receita/Despesa</button></li>
+          <li><button onclick="mostrarSecao('cadFuncionario')" class="w-full text-left">Cadastrar Funcionário</button></li>
+          <li><button onclick="mostrarSecao('cadCliente')" class="w-full text-left">Cadastrar Cliente</button></li>
+          <li><button onclick="mostrarSecao('ultimasVendas')" class="w-full text-left">Últimas Vendas</button></li>
+        </ul>
+      </nav>
+
+      <main class="flex-1 p-6">
+        <!-- Sections -->
+        <section id="dashboard" class="mb-8">
+          <h2 class="text-xl font-semibold mb-2">Dashboard</h2>
+          <canvas id="graficoVendas"></canvas>
+        </section>
+
+        <section id="estoque" class="hidden mb-8">
+          <h2 class="text-xl font-semibold mb-2">Estoque</h2>
+          <div class="flex gap-2 mb-4">
+            <input type="text" id="buscaProduto" placeholder="Buscar produto..." onkeyup="buscarProduto()" class="border p-2 w-full" />
+            <button onclick="mostrarFormularioProduto()" class="bg-green-600 text-white px-4 py-2 rounded">Adicionar Produto</button>
+          </div>
+
+          <div id="formProduto" class="hidden bg-white p-4 border rounded mb-4">
+            <h3 class="font-semibold mb-2">Cadastrar Novo Produto</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input type="text" id="nomeProduto" placeholder="Nome" class="border p-2" />
+              <input type="number" id="quantidadeProduto" placeholder="Quantidade" class="border p-2" />
+              <input type="number" id="precoProduto" placeholder="Preço (R$)" class="border p-2" />
+            </div>
+            <div class="mt-2 flex gap-2">
+              <button onclick="adicionarProduto()" class="bg-blue-600 text-white px-4 py-2 rounded">Cadastrar</button>
+              <button onclick="fecharFormularioProduto()" class="bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+            </div>
+          </div>
+
+          <table class="w-full text-left border border-collapse">
+            <thead>
+              <tr class="bg-gray-200">
+                <th class="border p-2">Produto</th>
+                <th class="border p-2">Quantidade</th>
+                <th class="border p-2">Preço (R$)</th>
+                <th class="border p-2">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEstoque"></tbody>
+          </table>
+        </section>
+
+        <section id="financeiro" class="hidden mb-8">
+          <h2 class="text-xl font-semibold mb-2">Financeiro</h2>
+          <p><strong>Receitas:</strong> R$ <span id="totalReceitas">0.00</span></p>
+          <p><strong>Despesas:</strong> R$ <span id="totalDespesas">0.00</span></p>
+          <p><strong>Saldo:</strong> R$ <span id="saldoFinal">0.00</span></p>
+        </section>
+
+        <section id="despesasReceitas" class="hidden mb-8">
+          <h2 class="text-xl font-semibold mb-2">Adicionar Receita / Despesa</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <select id="tipoLancamento" class="border p-2">
+              <option value="receita">Receita</option>
+              <option value="despesa">Despesa</option>
+            </select>
+            <input type="text" id="descricaoLancamento" placeholder="Descrição" class="border p-2" />
+            <input type="number" id="valorLancamento" placeholder="Valor (R$)" class="border p-2" />
+          </div>
+          <button onclick="adicionarLancamento()" class="bg-green-600 text-white px-4 py-2 rounded">Adicionar</button>
+          <ul id="listaLancamentos" class="mt-4 list-disc pl-5"></ul>
+        </section>
+
+        <section id="cadFuncionario" class="hidden mb-8">
+          <h2 class="text-xl font-semibold mb-2">Cadastrar Funcionário</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" id="nomeFuncionario" placeholder="Nome completo" class="border p-2" />
+            <input type="text" id="cpf" placeholder="CPF" class="border p-2" />
+            <input type="email" placeholder="Email" class="border p-2" />
+            <input type="text" placeholder="Cargo" class="border p-2" />
+            <input type="text" id="cep" placeholder="CEP" class="border p-2" />
+            <input type="text" id="logradouro" placeholder="Rua" class="border p-2" />
+            <input type="text" id="bairro" placeholder="Bairro" class="border p-2" />
+            <input type="text" id="cidade" placeholder="Cidade" class="border p-2" />
+            <input type="text" id="uf" placeholder="Estado" maxlength="2" class="border p-2" />
+            <select name="genero" class="border p-2">
+              <option value="" disabled selected>Gênero</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+            </select>
+            <input type="tel" id="telefone" placeholder="Telefone" class="border p-2" />
+          </div>
+          <button id="cadfunc" onclick="mostrarfuncionarionovo()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Cadastrar Funcionário</button>
+        </section>
+
+        <section id="formfunc" class="hidden mb-8">
+          <h3 class="text-green-700 text-lg font-semibold">Funcionário cadastrado com sucesso!</h3>
+          <div id="resultado" class="my-2"></div>
+          <button onclick="demitir()" class="bg-red-500 text-white px-4 py-2 rounded">Remover</button>
+        </section>
+
+        <section id="cadCliente" class="hidden mb-8">
+          <h2 class="text-xl font-semibold mb-2">Cadastrar Cliente</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" placeholder="Nome completo" class="border p-2" />
+            <input type="email" placeholder="Email" class="border p-2" />
+            <input type="tel" id="telefone1" placeholder="Telefone" class="border p-2" />
+            <input type="text" id="cpf1" placeholder="CPF" class="border p-2" />
+            <input type="text" placeholder="Endereço completo" class="border p-2 md:col-span-2" />
+          </div>
+          <button onclick="cadastrarCliente()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Cadastrar Cliente</button>
+        </section>
+
+        <section id="ultimasVendas" class="hidden mb-8">
+          <h2 class="text-xl font-semibold mb-2">Últimas Vendas</h2>
+          <table class="w-full border border-collapse">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="border p-2">Cliente</th>
+                <th class="border p-2">Valor</th>
+                <th class="border p-2">Produtos</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaUltimasVendas"></tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+
+    <footer class="bg-gray-800 text-white text-center py-4 mt-6">
+      <p class="text-sm">© 2025 MAGUILA - Sistema de Mercado | Feito por PFP'S Enterprises</p>
+      <p class="text-xs"><a href="#" class="underline">Termos de Serviço</a> | <a href="#" class="underline">Política de Privacidade</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js/index.js" defer></script>
+  </body>
+</html>
